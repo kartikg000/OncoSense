@@ -16,12 +16,18 @@ st.set_page_config(
 @st.cache_resource
 def load_assets():
     """Loads the trained model, scaler, and feature info."""
-    model_path = 'model/rf_model.joblib'
-    scaler_path = 'model/scaler.joblib'
-    feature_info_path = 'model/feature_info.joblib'
+    # Use paths relative to this file so the app works when deployed
+    base_dir = os.path.dirname(__file__)
+    model_path = os.path.join(base_dir, 'model', 'rf_model.joblib')
+    scaler_path = os.path.join(base_dir, 'model', 'scaler.joblib')
+    feature_info_path = os.path.join(base_dir, 'model', 'feature_info.joblib')
     
-    if not os.path.exists(model_path) or not os.path.exists(scaler_path):
-        st.error("Model or Scaler files not found. Please run `python model_training/train_model.py` first.")
+    missing = [p for p in (model_path, scaler_path, feature_info_path) if not os.path.exists(p)]
+    if missing:
+        st.error(
+            "Model or Scaler files not found. Please run `python model_training/train_model.py` locally and commit the `model/` directory, or ensure the model files are present in the repository before deploying.\n" \
+            f"Missing paths:\n{chr(10).join(missing)}"
+        )
         st.stop()
         
     try:
